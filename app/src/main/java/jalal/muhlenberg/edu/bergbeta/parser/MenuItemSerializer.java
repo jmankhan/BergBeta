@@ -4,8 +4,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 
 import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
 
@@ -19,6 +21,12 @@ public class MenuItemSerializer implements JsonSerializer<MenuItem> {
         obj.addProperty("id", src.getId());
         obj.addProperty("name", src.getName());
         obj.addProperty("daymeal", src.getDaymeal());
+        obj.addProperty("station", src.getStation());
+        obj.addProperty("calories", src.getCalories());
+        obj.addProperty("fatCalories", src.getFatCalories());
+        obj.addProperty("fat", src.getFat());
+        obj.addProperty("protein", src.getProtein());
+        obj.addProperty("sugar", src.getSugar());
         return obj;
     }
 }

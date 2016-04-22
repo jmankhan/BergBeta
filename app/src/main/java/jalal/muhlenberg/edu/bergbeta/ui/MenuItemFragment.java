@@ -57,7 +57,7 @@ public class MenuItemFragment extends Fragment {
 
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view;
-        recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
+        recyclerView.setLayoutManager(new GridLayoutManager(context, 1));
         recyclerView.setAdapter(new MenuItemAdapter(menuItems));
         return view;
     }

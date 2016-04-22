@@ -34,6 +34,8 @@ public class Parser {
         Elements days = doc.select(".dayinner");
         for(int i=0; i<days.size(); i++) {
             Elements meals = days.get(i).select(".mealname");
+            String station = meals.select(".station").text();
+
             for(int j=0; j<meals.size(); j++) {
                 Elements itemBlocks = days.get(i).select("td[class=menuitem]");
                 for(Element itemBlock : itemBlocks) {
@@ -41,6 +43,7 @@ public class Parser {
                     item.setName(itemBlock.text());
                     item.setId(itemBlock.select("input").attr("id"));
                     item.setDaymeal(i+j);
+                    item.setStation(station);
                     menuItems.add(item);
                 }
             }
@@ -112,6 +115,7 @@ public class Parser {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
 
         return gson;
     }

@@ -11,6 +11,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
@@ -35,9 +39,31 @@ public class ParserTest extends InstrumentationTestCase {
         while(s.hasNextLine()) {
             builder.append(s.nextLine());
         }
+
+        ArrayList<MenuItem> menuItems = new ArrayList<>();
+
         String html = builder.toString();
-        ArrayList<MenuItem> menuItems = Parser.parseFromHTML(html);
-        assertNotNull(menuItems);
+        Document doc = Jsoup.parse(html);
+        Elements days = doc.select(".dayinner");
+        for(int i=0; i<days.size(); i++) {
+            Elements meals = days.get(i).select(".mealname");
+            String station = "";
+
+            for(int j=0; j<meals.size(); j++) {
+                Elements itemBlocks = days.get(i).select("td[class=menuitem]");
+                if(itemBlocks.select())
+                for(Element itemBlock : itemBlocks) {
+                    MenuItem item = new MenuItem();
+                    item.setName(itemBlock.text());
+                    item.setId(itemBlock.select("input").attr("id"));
+                    item.setDaymeal(i+j);
+                    item.setStation(station);
+                    menuItems.add(item);
+                }
+            }
+        }
+
+
     }
 
     @Test
