@@ -20,7 +20,8 @@ public class MenuItemSerializer implements JsonSerializer<MenuItem> {
         final JsonObject obj = new JsonObject();
         obj.addProperty("id", src.getId());
         obj.addProperty("name", src.getName());
-        obj.addProperty("daymeal", src.getDaymeal());
+        obj.addProperty("day", src.getDay());
+        obj.addProperty("meal", src.getMeal());
         obj.addProperty("station", src.getStation());
         obj.addProperty("calories", src.getCalories());
         obj.addProperty("fatCalories", src.getFatCalories());

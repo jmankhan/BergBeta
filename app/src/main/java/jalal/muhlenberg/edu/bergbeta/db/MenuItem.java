@@ -17,7 +17,9 @@ public class MenuItem extends RealmObject {
 
     private String name;
 
-    private int daymeal;
+    private int day;
+
+    private String meal;
 
     private String station;
 
@@ -39,14 +41,6 @@ public class MenuItem extends RealmObject {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public int getDaymeal() {
-        return daymeal;
-    }
-
-    public void setDaymeal(int daymeal) {
-        this.daymeal = daymeal;
     }
 
     public String getStation() {
@@ -97,4 +91,19 @@ public class MenuItem extends RealmObject {
         this.fat = fat;
     }
 
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public String getMeal() {
+        return meal;
+    }
+
+    public void setMeal(String meal) {
+        this.meal = meal;
+    }
 }

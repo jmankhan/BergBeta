@@ -63,11 +63,6 @@ public class MenuItemFragment extends Fragment {
     }
 
     private ArrayList<MenuItem> getCurrentMeal(ArrayList<MenuItem> menuItems) {
-        ArrayList<MenuItem> items = new ArrayList<>();
-        for(MenuItem item : menuItems) {
-            if(item.getDaymeal() == daymeal)
-                items.add(item);
-        }
-        return items;
+        return menuItems;
     }
 }

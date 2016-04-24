@@ -13,9 +13,16 @@ import com.google.gson.reflect.TypeToken;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
+import org.jsoup.select.NodeVisitor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.realm.RealmObject;
 import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
@@ -26,27 +33,53 @@ import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
 public class Parser {
 
     public static ArrayList<MenuItem> parseFromHTML(String html) {
-        ArrayList<MenuItem> menuItems = new ArrayList<>();
+        final ArrayList<MenuItem> menuItems = new ArrayList<>();
         Document doc = Jsoup.parse(html);
         String title = doc.select(".titlecell").text();
         String date = title.substring(title.indexOf("day")+3);
 
-        Elements days = doc.select(".dayinner");
-        for(int i=0; i<days.size(); i++) {
-            Elements meals = days.get(i).select(".mealname");
-            String station = meals.select(".station").text();
+        final StringBuilder station = new StringBuilder();
+        final StringBuilder meal = new StringBuilder();
 
-            for(int j=0; j<meals.size(); j++) {
-                Elements itemBlocks = days.get(i).select("td[class=menuitem]");
-                for(Element itemBlock : itemBlocks) {
-                    MenuItem item = new MenuItem();
-                    item.setName(itemBlock.text());
-                    item.setId(itemBlock.select("input").attr("id"));
-                    item.setDaymeal(i+j);
-                    item.setStation(station);
-                    menuItems.add(item);
+        Elements days = doc.select(".dayinner");
+        for (int i = 0; i < days.size(); i++) {
+            final int finalI = i;
+            days.get(i).traverse(new NodeVisitor() {
+                @Override
+                public void head(Node node, int depth) {
+                    if(node.hasAttr("class")) {
+                        String nodeClass = node.attr("class");
+                        if(nodeClass.equalsIgnoreCase("mealname")) {
+                            meal.setLength(0);
+                            meal.append(((Element) node).text());
+                        } else if(nodeClass.equalsIgnoreCase("station")) {
+                            station.setLength(0);
+                            station.append(((Element) node).text());
+                        } else if(nodeClass.equalsIgnoreCase("menuitem")
+                                && node.nodeName().equalsIgnoreCase("td")) {
+                            String text = ((TextNode) node).text();
+                            String id = "";
+                            for(Node n:node.childNode(1).childNodes()) {
+                                if(n.nodeName().equalsIgnoreCase("span"))
+                                    id = n.attr("onclick");
+                            }
+
+                            id = id.substring(id.indexOf("\'")+1, id.lastIndexOf("\'"));
+                            MenuItem item = new MenuItem();
+                            item.setName(text);
+                            item.setId(id);
+                            item.setMeal(meal.toString());
+                            item.setDay(finalI);
+                            menuItems.add(item);
+                        }
+                    }
                 }
-            }
+
+                @Override
+                public void tail(Node node, int depth) {
+
+                }
+            });
         }
         return menuItems;
     }
@@ -120,4 +153,34 @@ public class Parser {
         return gson;
     }
 
+    private void nutritionToMap(String nutritionScript) {
+        Map<String, String[]> facts = new HashMap<>();
+        int serving_size = 0;
+        int calories = 1;
+        int calfat = 2;
+        int fat = 3;
+        int sugar = 16;
+        int protein = 17;
+        final int id_size = 17;
+
+        Pattern pattern = Pattern.compile("(?!aData=)aData(.*?);");
+        Matcher matcher = pattern.matcher(nutritionScript);
+        while (matcher.find()) {
+            String line = matcher.group();
+            String id = line.substring(line.indexOf("\'") + 1, line.indexOf("\'") + id_size);
+            String[] nuts = line.substring(line.indexOf("(") + 1, line.lastIndexOf(")")).split(",");
+
+            String[] f = new String[6];
+            f[0] = nuts[serving_size];
+            f[1] = nuts[calories];
+            f[2] = nuts[calfat];
+            f[3] = nuts[fat];
+            f[4] = nuts[sugar];
+            f[5] = nuts[protein];
+
+            facts.put(id, f);
+        }
+
+
+    }
 }

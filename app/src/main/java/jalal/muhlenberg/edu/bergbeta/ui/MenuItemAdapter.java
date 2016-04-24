@@ -26,12 +26,19 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIView
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_menuitem,
                 parent, false);
 
+        view.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
         return new MIViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(MIViewHolder holder, int position) {
-        holder.name.setText(items.get(position).getName());
+        holder.bindMenuItem(items.get(position));
     }
 
     @Override
@@ -41,7 +48,6 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIView
 
     class MIViewHolder extends RecyclerView.ViewHolder {
         TextView name;
-        MenuItem item;
 
         public MIViewHolder(View itemView) {
             super(itemView);
@@ -49,8 +55,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIView
         }
 
         public void bindMenuItem(MenuItem item) {
-            this.item = item;
-            name.setText(item.getName());
+            name.setText(item.getName() + "\n" + item.getId()                                       );
         }
     }
 }
