@@ -61,7 +61,10 @@ public class RealmInstance {
      * @return MenuItem
      */
     public MenuItem getMenuItem(String id) {
-        RealmResults<MenuItem> results = db.where(MenuItem.class).findAllSorted(id);
+        RealmQuery<MenuItem> query = db.where(MenuItem.class);
+        query.equalTo("id", id);
+
+        RealmResults<MenuItem> results = query.findAll();
 
         if(results.isEmpty())
             return null;

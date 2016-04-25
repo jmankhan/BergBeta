@@ -2,7 +2,6 @@ package jalal.muhlenberg.edu.bergbeta.ui;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Debug;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,7 +19,7 @@ import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
  * A fragment representing a list of Items.
  * <p/>
  */
-public class MenuItemFragment extends Fragment {
+public class MenuItemListFragment extends Fragment {
 
     private static final String DAYMEAL = "day-meal";
     private int daymeal = -1;
@@ -30,11 +29,11 @@ public class MenuItemFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public MenuItemFragment() {
+    public MenuItemListFragment() {
     }
 
-    public static MenuItemFragment newInstance(int daymeal) {
-        MenuItemFragment fragment = new MenuItemFragment();
+    public static MenuItemListFragment newInstance(int daymeal) {
+        MenuItemListFragment fragment = new MenuItemListFragment();
         Bundle args = new Bundle();
         args.putInt(DAYMEAL, daymeal);
         fragment.setArguments(args);
@@ -55,10 +54,10 @@ public class MenuItemFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_menuitem_list, container, false);
 
-        Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view;
-        recyclerView.setLayoutManager(new GridLayoutManager(context, 1));
-        recyclerView.setAdapter(new MenuItemAdapter(menuItems));
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.menuItemRecycler);
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
+        recyclerView.setAdapter(new MenuItemAdapter((MenuActivity) getActivity(), menuItems));
+
         return view;
     }
 

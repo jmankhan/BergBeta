@@ -3,6 +3,7 @@ package jalal.muhlenberg.edu.bergbeta.parser;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
@@ -25,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.realm.RealmObject;
+import jalal.muhlenberg.edu.bergbeta.R;
 import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
 
 /**
@@ -32,14 +34,27 @@ import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
  */
 public class Parser {
 
+    private final static int total_nutrition_size = 30;
+    private final static int serving_size = 0;
+    private final static int calories = 1;
+    private final static int calfat = 2;
+    private final static int fat = 3;
+    private final static int sugar = 16;
+    private final static int protein = 17;
+
     public static ArrayList<MenuItem> parseFromHTML(String html) {
         final ArrayList<MenuItem> menuItems = new ArrayList<>();
         Document doc = Jsoup.parse(html);
         String title = doc.select(".titlecell").text();
-        String date = title.substring(title.indexOf("day")+3);
+        String date = title.substring(title.indexOf("day") + 3);
 
         final StringBuilder station = new StringBuilder();
         final StringBuilder meal = new StringBuilder();
+
+        Elements scripts = doc.select("script");
+        String script = scripts.get(scripts.size() - 2).toString();
+
+        final Map<String, String[]> nutritionInfo = nutritionToMap(script);
 
         Elements days = doc.select(".dayinner");
         for (int i = 0; i < days.size(); i++) {
@@ -57,19 +72,27 @@ public class Parser {
                             station.append(((Element) node).text());
                         } else if(nodeClass.equalsIgnoreCase("menuitem")
                                 && node.nodeName().equalsIgnoreCase("td")) {
-                            String text = ((TextNode) node).text();
-                            String id = "";
+
+                            String nameText = "", id = "";
                             for(Node n:node.childNode(1).childNodes()) {
-                                if(n.nodeName().equalsIgnoreCase("span"))
+                                if(n.nodeName().equalsIgnoreCase("span")) {
                                     id = n.attr("onclick");
+                                    nameText = ((Element) n).text();
+                                }
                             }
 
                             id = id.substring(id.indexOf("\'")+1, id.lastIndexOf("\'"));
                             MenuItem item = new MenuItem();
-                            item.setName(text);
+                            item.setName(nameText);
                             item.setId(id);
                             item.setMeal(meal.toString());
                             item.setDay(finalI);
+                            item.setCalories(nutritionInfo.get(id)[calories]);
+                            item.setFatCalories(nutritionInfo.get(id)[calfat]);
+                            item.setFat(nutritionInfo.get(id)[fat]);
+                            item.setSugar(nutritionInfo.get(id)[sugar]);
+                            item.setProtein(nutritionInfo.get(id)[protein]);
+
                             menuItems.add(item);
                         }
                     }
@@ -89,7 +112,8 @@ public class Parser {
     }
 
     public static ArrayList<MenuItem> parseFromJSON(String json) {
-        return getGSON().fromJson(json, new TypeToken<ArrayList<MenuItem>>(){}.getType()); //hax
+        return getGSON().fromJson(json, new TypeToken<ArrayList<MenuItem>>() {
+        }.getType()); //hax
     }
 
     public static void saveFile(Context ctx, String json) {
@@ -153,14 +177,9 @@ public class Parser {
         return gson;
     }
 
-    private void nutritionToMap(String nutritionScript) {
+    private static Map<String, String[]> nutritionToMap(String nutritionScript) {
         Map<String, String[]> facts = new HashMap<>();
-        int serving_size = 0;
-        int calories = 1;
-        int calfat = 2;
-        int fat = 3;
-        int sugar = 16;
-        int protein = 17;
+
         final int id_size = 17;
 
         Pattern pattern = Pattern.compile("(?!aData=)aData(.*?);");
@@ -170,17 +189,10 @@ public class Parser {
             String id = line.substring(line.indexOf("\'") + 1, line.indexOf("\'") + id_size);
             String[] nuts = line.substring(line.indexOf("(") + 1, line.lastIndexOf(")")).split(",");
 
-            String[] f = new String[6];
-            f[0] = nuts[serving_size];
-            f[1] = nuts[calories];
-            f[2] = nuts[calfat];
-            f[3] = nuts[fat];
-            f[4] = nuts[sugar];
-            f[5] = nuts[protein];
-
-            facts.put(id, f);
+            facts.put(id, nuts);
         }
 
 
+        return facts;
     }
 }

@@ -65,19 +65,19 @@ public class ParserTest extends InstrumentationTestCase {
                         if (node.attr("class").equalsIgnoreCase("mealname")) {
                             meal.setLength(0);
                             meal.append(((Element) node).text());
-                        }
-                        else if (node.attr("class").equalsIgnoreCase("station")) {
+                        } else if (node.attr("class").equalsIgnoreCase("station")) {
                             station.setLength(0);
                             station.append(((Element) node).text());
-                        }
-                        else if (node.attr("class").equalsIgnoreCase("menuitem")
+                        } else if (node.attr("class").equalsIgnoreCase("menuitem")
                                 && node.nodeName().equalsIgnoreCase("td")) {
 
-                            String text = ((TextNode) node.childNode(0)).text();
+                            String text="";
                             String id = "";
                             for (Node n : node.childNode(1).childNodes())
-                                if (n.nodeName().equalsIgnoreCase("span"))
+                                if (n.nodeName().equalsIgnoreCase("span")) {
                                     id = n.attr("onclick");
+                                    text = ((Element) n).text();
+                                }
 
                             id = id.substring(id.indexOf("\'") + 1, id.lastIndexOf("\'"));
                             MenuItem item = new MenuItem();
@@ -86,6 +86,8 @@ public class ParserTest extends InstrumentationTestCase {
                             item.setDay(finalI);
                             item.setMeal(meal.toString());
                             menuItems.add(item);
+
+                            Log.d("ayy", "text: " + text);
                         }
                     }
                 }

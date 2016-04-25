@@ -5,8 +5,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import jalal.muhlenberg.edu.bergbeta.R;
+import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
+import jalal.muhlenberg.edu.bergbeta.db.RealmInstance;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,7 +22,7 @@ public class DetailsFragment extends Fragment {
     private static final String MENU_ITEM_ID = "menu_item_id";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    private String menuitemId;
 
 
     public DetailsFragment() {
@@ -32,7 +35,6 @@ public class DetailsFragment extends Fragment {
      * @param id id of menu_item to display.
      * @return A new instance of fragment DetailsFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static DetailsFragment newInstance(String id) {
         DetailsFragment fragment = new DetailsFragment();
         Bundle args = new Bundle();
@@ -45,7 +47,7 @@ public class DetailsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(MENU_ITEM_ID);
+            menuitemId = getArguments().getString(MENU_ITEM_ID);
         }
     }
 
@@ -54,8 +56,17 @@ public class DetailsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_details, container, false);
+        RealmInstance instance = new RealmInstance(getActivity());
+        MenuItem item = instance.getMenuItem(menuitemId);
+
+        ((TextView) view.findViewById(R.id.calories_view)).setText(item.getCalories());
+        ((TextView) view.findViewById(R.id.fat_calories_view)).setText(item.getFatCalories());
+        ((TextView) view.findViewById(R.id.fat_view)).setText(item.getFat());
+        ((TextView) view.findViewById(R.id.sugar_view)).setText(item.getSugar());
+        ((TextView) view.findViewById(R.id.protein_view)).setText(item.getProtein());
 
         return view;
     }
+
 
 }

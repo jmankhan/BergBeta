@@ -1,10 +1,10 @@
 package jalal.muhlenberg.edu.bergbeta;
 
 import android.os.Bundle;
-import android.os.Debug;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,7 +14,6 @@ import android.view.Menu;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -25,7 +24,9 @@ import jalal.muhlenberg.edu.bergbeta.db.RealmInstance;
 import jalal.muhlenberg.edu.bergbeta.network.NetworkManager;
 import jalal.muhlenberg.edu.bergbeta.network.VolleyCallback;
 import jalal.muhlenberg.edu.bergbeta.parser.Parser;
-import jalal.muhlenberg.edu.bergbeta.ui.MenuItemFragment;
+import jalal.muhlenberg.edu.bergbeta.ui.DetailsFragment;
+import jalal.muhlenberg.edu.bergbeta.ui.MenuItemClickCallback;
+import jalal.muhlenberg.edu.bergbeta.ui.MenuItemListFragment;
 
 /**
  * This class maintains the data for each weekly menu. It is responsible for managing and displaying
@@ -35,7 +36,7 @@ import jalal.muhlenberg.edu.bergbeta.ui.MenuItemFragment;
  * This class will not handle Network calls or file management. It will request these changes from
  * other classes.
  */
-public class MenuActivity extends AppCompatActivity implements VolleyCallback {
+public class MenuActivity extends AppCompatActivity implements VolleyCallback, MenuItemClickCallback {
 
     /**
      * This will provide fragments, a memory efficient component, to store and display our data
@@ -43,7 +44,7 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback {
      * If they end up using more, we should switch to a PagerStateAdapter, which should be almost
      * interchangeable with this object.
      */
-    private SectionsPagerAdapter pagerAdapter;
+    private MenuDayPagerAdapter pagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -195,15 +196,14 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback {
         long last = System.currentTimeMillis();
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        pagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        pagerAdapter = new MenuDayPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        viewPager = (ViewPager) findViewById(R.id.container);
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
         if(viewPager != null)
             viewPager.setAdapter(pagerAdapter);
 
-        long now = System.currentTimeMillis();
-        Log.d(getPackageName(), "time to populate views: " + (now-last));
+
     }
 
     public ArrayList<MenuItem> getMenuItems() {
@@ -224,20 +224,28 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback {
 
     }
 
+    @Override
+    public void onClick(String id) {
+        DetailsFragment details = DetailsFragment.newInstance(id);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.viewpager_container, details);
+        ft.addToBackStack(null);
+        ft.commit();
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class MenuDayPagerAdapter extends FragmentPagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public MenuDayPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            return MenuItemFragment.newInstance(position + 1);
+            return MenuItemListFragment.newInstance(position + 1);
         }
 
         @Override
@@ -259,6 +267,9 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback {
             return null;
         }
 
-
+        @Override
+        public int getItemPosition(Object object) {
+            return POSITION_NONE;
+        }
     }
 }

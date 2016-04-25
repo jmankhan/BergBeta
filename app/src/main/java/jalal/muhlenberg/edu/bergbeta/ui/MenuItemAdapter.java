@@ -1,6 +1,10 @@
 package jalal.muhlenberg.edu.bergbeta.ui;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +12,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import jalal.muhlenberg.edu.bergbeta.MenuActivity;
 import jalal.muhlenberg.edu.bergbeta.R;
 import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
 
@@ -16,8 +21,10 @@ import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
  */
 public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIViewHolder> {
     private ArrayList<MenuItem> items;
+    private MenuItemClickCallback callback;
 
-    public MenuItemAdapter(ArrayList<MenuItem> items) {
+    public MenuItemAdapter(MenuItemClickCallback callback, ArrayList<MenuItem> items) {
+        this.callback = callback;
         this.items = items;
     }
 
@@ -26,13 +33,6 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIView
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_menuitem,
                 parent, false);
 
-        view.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
         return new MIViewHolder(view);
     }
 
@@ -46,16 +46,26 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIView
         return items.size();
     }
 
-    class MIViewHolder extends RecyclerView.ViewHolder {
+    class MIViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener{
         TextView name;
+        String id;
 
         public MIViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.name);
+            CardView card = (CardView) itemView.findViewById(R.id.menuitem_card);
+            card.setOnClickListener(this);
         }
 
         public void bindMenuItem(MenuItem item) {
-            name.setText(item.getName() + "\n" + item.getId()                                       );
+            name.setText(item.getName());
+            id = item.getId();
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.d("ayy", "clicked item " + name.getText());
+            callback.onClick(id);
         }
     }
 }
