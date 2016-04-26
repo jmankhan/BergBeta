@@ -68,8 +68,11 @@ public class Parser {
                             meal.setLength(0);
                             meal.append(((Element) node).text());
                         } else if(nodeClass.equalsIgnoreCase("station")) {
-                            station.setLength(0);
-                            station.append(((Element) node).text());
+                            Element n = (Element) node;
+                            if(n.text().length() > 1) {
+                                station.setLength(0);
+                                station.append(n.text());
+                            }
                         } else if(nodeClass.equalsIgnoreCase("menuitem")
                                 && node.nodeName().equalsIgnoreCase("td")) {
 
@@ -85,6 +88,7 @@ public class Parser {
                             MenuItem item = new MenuItem();
                             item.setName(nameText);
                             item.setId(id);
+                            item.setStation(station.toString());
                             item.setMeal(meal.toString());
                             item.setDay(finalI);
                             item.setCalories(nutritionInfo.get(id)[calories]);

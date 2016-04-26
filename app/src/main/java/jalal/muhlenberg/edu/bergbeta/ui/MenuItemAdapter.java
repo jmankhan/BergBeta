@@ -1,14 +1,15 @@
 package jalal.muhlenberg.edu.bergbeta.ui;
 
-import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -21,10 +22,10 @@ import jalal.muhlenberg.edu.bergbeta.db.MenuItem;
  */
 public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIViewHolder> {
     private ArrayList<MenuItem> items;
-    private MenuItemClickCallback callback;
+    private MenuActivity activity;
 
-    public MenuItemAdapter(MenuItemClickCallback callback, ArrayList<MenuItem> items) {
-        this.callback = callback;
+    public MenuItemAdapter(MenuActivity activity, ArrayList<MenuItem> items) {
+        this.activity = activity;
         this.items = items;
     }
 
@@ -48,11 +49,20 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIView
 
     class MIViewHolder extends RecyclerView.ViewHolder  implements View.OnClickListener{
         TextView name;
+        ImageView img;
         String id;
 
         public MIViewHolder(View itemView) {
             super(itemView);
-            name = (TextView) itemView.findViewById(R.id.name);
+            name = (TextView) itemView.findViewById(R.id.menuitem_name);
+            img = (ImageView) itemView.findViewById(R.id.menuitem_image);
+
+            Picasso.with(activity)
+                    .load(R.drawable.pizza)
+                    .placeholder(R.drawable.placeholder)
+                    .fit()
+                    .into(img);
+
             CardView card = (CardView) itemView.findViewById(R.id.menuitem_card);
             card.setOnClickListener(this);
         }
@@ -64,8 +74,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.MIView
 
         @Override
         public void onClick(View v) {
-            Log.d("ayy", "clicked item " + name.getText());
-            callback.onClick(id);
+            activity.onClick(id);
         }
     }
 }

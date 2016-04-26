@@ -1,10 +1,10 @@
 package jalal.muhlenberg.edu.bergbeta;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,7 +24,6 @@ import jalal.muhlenberg.edu.bergbeta.db.RealmInstance;
 import jalal.muhlenberg.edu.bergbeta.network.NetworkManager;
 import jalal.muhlenberg.edu.bergbeta.network.VolleyCallback;
 import jalal.muhlenberg.edu.bergbeta.parser.Parser;
-import jalal.muhlenberg.edu.bergbeta.ui.DetailsFragment;
 import jalal.muhlenberg.edu.bergbeta.ui.MenuItemClickCallback;
 import jalal.muhlenberg.edu.bergbeta.ui.MenuItemListFragment;
 
@@ -44,7 +43,7 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback, M
      * If they end up using more, we should switch to a PagerStateAdapter, which should be almost
      * interchangeable with this object.
      */
-    private MenuDayPagerAdapter pagerAdapter;
+    private MenuPagerAdapter pagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -70,8 +69,10 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback, M
         //setup the default toolbar, use the if != null to avoid a warning
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if(getSupportActionBar() != null)
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(getSupportActionBar() != null) {
+
+            getSupportActionBar().setTitle("Berg Dining"); //in case set title doesnt work later
+        }
 
         //create db instance
         initDB();
@@ -193,16 +194,38 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback, M
 
 
     private void populateViews(ArrayList<MenuItem> menuItems) {
-        long last = System.currentTimeMillis();
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        pagerAdapter = new MenuDayPagerAdapter(getSupportFragmentManager());
+        pagerAdapter = new MenuPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         viewPager = (ViewPager) findViewById(R.id.viewPager);
-        if(viewPager != null)
+        if(viewPager != null) {
             viewPager.setAdapter(pagerAdapter);
+            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    String title = "";
+                    switch(position%3) {
+                        case 0: title="Breakfast"; break;
+                        case 1: title="Lunch"; break;
+                        case 2: title="Dinner"; break;
+                    }
+                    getSupportActionBar().setTitle(title);
+
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
+        }
 
     }
 
@@ -226,26 +249,26 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback, M
 
     @Override
     public void onClick(String id) {
-        DetailsFragment details = DetailsFragment.newInstance(id);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.viewpager_container, details);
-        ft.addToBackStack(null);
-        ft.commit();
+        Intent i = new Intent(this, DetailsActivity.class);
+        String menuitemId = getResources().getString(R.string.menuitem_id);
+        i.putExtra(menuitemId, id);
+        startActivity(i);
     }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class MenuDayPagerAdapter extends FragmentPagerAdapter {
+    public class MenuPagerAdapter extends FragmentPagerAdapter {
 
-        public MenuDayPagerAdapter(FragmentManager fm) {
+        public MenuPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
+        @SuppressWarnings("ConstantConditions")
         @Override
         public Fragment getItem(int position) {
-            return MenuItemListFragment.newInstance(position + 1);
+            return MenuItemListFragment.newInstance(position);
         }
 
         @Override
@@ -256,20 +279,8 @@ public class MenuActivity extends AppCompatActivity implements VolleyCallback, M
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position%3) {
-                case 0:
-                    return "Breakfast";
-                case 1:
-                    return "Lunch";
-                case 2:
-                    return "Dinner";
-            }
-            return null;
+            return "This doesn't even work lol";
         }
 
-        @Override
-        public int getItemPosition(Object object) {
-            return POSITION_NONE;
-        }
     }
 }
